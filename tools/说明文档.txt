@@ -1,0 +1,10 @@
+此文件夹为一些工具型代码
+1.create_video.py为制作视频的脚本，需要传入多张连续的图片（由show_evolution.py生成），并放在一个文件夹下面
+2.merge_images.py为将多张图片（竖向）合成一张的脚本，主要用于合并Repeatability_single_neuro.py产生的图
+3.ext_input_change_contrast.ipynb为生成grating的脚本
+4.grating.py为上一步（3）生成grating需要调用的脚本
+5.read_benchmark.ipynb为读取banchmark的命令
+6.Multigraph_generate.py用于从imagenet里面筛选多图攻击的图片（100张），会将选出来的图片存成一个文件，
+      存在/home/zhaobenyan/Attack_robustness/vit_model/files
+7.read_grating.py读取grating的数据（由/home/zhaobenyan/Robustness_test/tools/ext_input_change_contrast.ipynb生成）
+      读取加上噪声之后的grating的数据??(没有实现)

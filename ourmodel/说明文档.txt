@@ -1,0 +1,17 @@
+注：/home/zhaobenyan/repos/patchV1/src/tmp/ori.sh 48-50行取消了注释；/home/zhaobenyan/repos/patchV1/src/util/sampler.py 里面77-78行随机种子固定
+1.our_model.py为调用戴老师模型的接口
+2.attack_dw.py为对戴老师模型进行攻击的接口，若做重复性测试，将delta_list设置为全0即可
+      GaussianNoiseTestDw实例化之后，需依次调用get_noised（需传入delta_list)、get_results(需传入用什么范数，默认为二范数）方法
+      然后根据需要选择return的数据，如需要返回其他数据可另写一个方法
+3.Repeatability_test.py为对某一张grating进行重复性测试的脚本（设置为重复10次），主要是测试戴老师模型本身的“稳定性”
+      画图横坐标为重复的次数=delta_list的长度（设置为10），纵坐标1为error的二范数，纵坐标2为fr的二范数
+4.Repeatability_contrast.py为对不同contrast的grating进行重复测试的脚本，主要看不同contrast模型的稳定性
+      画图横坐标为contrast的值，纵坐标1为error的二范数(重复三次，数据为error除以了第0次fr二范数的数据），纵坐标2为第0次fr的二范数
+5.Repeatability_single_neuro.py为对某一张grating进行重复性测试,画每一个neuro的error的脚本，与Repeatability_contrast.py可以共用数据
+      画图横坐标为每一个neuro的编号，纵坐标为纵坐标1为error(重复三次），纵坐标2为第0次的fr
+6.Repeatability_time.py为对同一个grating，改变时间（通过改变/home/zhaobenyan/repos/patchV1/src/tmp/minimal_tmp.cfg中第43行的参数nt改变时间，
+      time=nt*dt(47行)，一般设置nt=8000,dt=0.125,故时间为1秒，目前只能通过手动改nt来调整时间
+      画图横坐标为时间（单位s), 纵坐标1为error的二范数(重复三次），纵坐标2为第0次fr的二范数
+      注：这里已经将筛选去掉了，因此一共有3840个神经元
+7.Noise_test.py为进行gauss噪声攻击的脚本
+      画图横坐标为噪声强度，纵坐标1为error的二范数，纵坐标2为扰动后fr本身的二范数
