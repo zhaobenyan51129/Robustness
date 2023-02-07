@@ -10,7 +10,7 @@ def get_fr(file,dir,repeat_times):
     for i in range(repeat_times):
         fr=ourmodel(file)
         fr_list.append(fr)
-    np.savez(dir+'/fr_time1',fr=fr_list)
+    np.savez(dir+'/fr_time5',fr=fr_list)
 
 #读取输出
 def read_output(file_name):
@@ -24,15 +24,15 @@ def path_exist(path):
         os.makedirs(path)
 
 #重复实验
-def experiment(repeat_times):
-    ls=[16,32,256]
-    for size in ls:
-        for i in range(repeat_times):
-            file='/home/zhaobenyan/dataset/grating/grating_{}x{}_frameRate96/static_color-grid_{}.bin'.format(size,size,i+1)
-            dir='/home/zhaobenyan/dataset/output/draftgrating_{}x{}/contrast{}/'.format(size,size,i+1)
-            path_exist(dir)
-            get_fr(file,dir,repeat_times)
+def experiment(repeat_times,size):
+    for i in range(10):
+        file='/home/zhaobenyan/dataset/grating/grating_{}x{}_frameRate1/static_color-grid_{}.bin'.format(size,size,i+1)
+        dir='/home/zhaobenyan/dataset/output/grating_{}x{}/contrast{}/'.format(size,size,i+1)
+        path_exist(dir)
+        get_fr(file,dir,repeat_times)
+# dir='/home/zhaobenyan/dataset/output/grating_16x16/contrast10/'         
+# fr=read_output(dir+'fr_time1.npz')
+# print(np.count_nonzero(fr[0]==0))
+experiment(10,32)
 
-experiment(10)
-# fr=read_output(dir+'fr_repeat.npz')
 # print(len(fr[0]))

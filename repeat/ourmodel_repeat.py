@@ -20,7 +20,7 @@ def ourmodel(dir):
         x_4 = np.fromfile(f, 'f4', 2)
         x_5 = np.fromfile(f, 'u4', 1)
         x_6 = np.fromfile(f, 'f4', nFrame*size*size*3)
-        #写文件,'wb'表示覆盖写文件 f1打开“替死鬼”文件地址
+        #写文件,'wb'表示覆盖写文件 f1打开“替死鬼”文件地址 注意要修改minimal.cfg对应的fStimulus
         f1 = open('/home/zhaobenyan/dataset/resource/static_color-grid_{}.bin'.format(size), 'wb') 
         np.array(x_1).astype('i4').tofile(f1) 
         np.array((x_2[0],size,size), dtype='i4').tofile(f1)
