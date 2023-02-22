@@ -33,12 +33,13 @@ def minimalTC():
     os.system(f'cd {src_dir} && ./minimalTC')
 
 def main():
-    compile()
-    resource()
-    retine()
-    # patch()
-    # minimalTC()
+    #compile()
+    #resource()
+    #retine()
+    #patch()
+    minimalTC()
 
 main()
 
+print("complete!!")
 print("complete!!")
