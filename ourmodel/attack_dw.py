@@ -4,20 +4,20 @@ import numpy as np
 import os
 from shutil import copy 
 import glob
-from our_model import ourmodel 
+from ourmodel_attack import ourmodel 
 
-def ljy_bin_image_to_tensor(file_dir):
-    """读取单张grating, return numpy"""
-    with open(file_dir) as f:
+def image_to_tensor(file):
+    with open(file) as f:
         x_1 = np.fromfile(f, 'i4', 1)
         x_2 = np.fromfile(f, 'i4', 3)
+        nFrame=x_2[0]
+        size=x_2[1]
         x_3 = np.fromfile(f, 'f4', 3)
         x_4 = np.fromfile(f, 'f4', 2)
         x_5 = np.fromfile(f, 'u4', 1)
-        #x_6 = np.fromfile(f, 'f4', 224*224*3)
-        x_6 = np.fromfile(f, 'f4', 32*32*3)
-        image_numpy = x_6.reshape(32, 32, 3)
-    return image_numpy # [224, 224, 3]
+        x_6 = np.fromfile(f, 'f4', nFrame*size*size*3)
+        image_numpy = x_6.reshape(3,size, size)
+    return image_numpy.transpose([1,2,0])
 
 # 获取基准 【注意】chosen需和daiwei_pack中保持一致
 def get_standard(chosen=False):
@@ -76,7 +76,7 @@ class GaussianNoiseTestDw:
         clipping:是否进行clip操作
         '''
         self.delta_list = delta_list
-        noise=torch.load('normal_noise_small.pth') #噪声，需手动修改
+        noise=torch.load('/home/zhaobenyan/robustness/datas/normal_noise_{}.pth'.format(self.img_size)) #噪声
         
         # 生成被白噪声攻击过的图片list
         if fix:

@@ -1,0 +1,7 @@
+clone_mkdir.sh:从戴老师的github拉取代码,创建所需文件夹
+environment_variable.txt为储存环境变量的文件
+generate_grating.py为生成grating(draftgrating)的脚本
+grating.py、ext_signal.py为上一步（3）生成grating需要调用的脚本(无需修改)
+resource.py:调用pinwheel_disk_tmp.py 生成resource文件
+read_grating.py:读取grating的数据以及实验生成的spike....bin数据
+minimal.py:进行一次模拟

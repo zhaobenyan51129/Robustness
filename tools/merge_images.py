@@ -19,52 +19,25 @@ def jigsaw(imgs, direction="vertical", gap=0):
         raise ValueError("The direction parameter has only two options: horizontal and vertical")
     return np.array(result)
 
-def merge_noise_test():
-    #将/home/zhaobenyan/Attack_robustness/ourmodel/Noise_test.py生成的图片画成4X3的一张图
+#将多张图片合成mxn的大图 dir:图片路径，共m*n张，dir_out:输出图片路径
+def merge_images(m,n,dir,dir_out):
     images=[]
-    img=cv2.imread('/home/zhaobenyan/data/dw_test_new/Noise_test/gray/gauss_attack.png')
-    images.append(img)
-    for i in range(1,11):      
-        img = cv2.imread("/home/zhaobenyan/data/dw_test_new/Noise_test/Contrast{}/gauss_attack.png".format(i))
-        images.append(img)
-    img_horizontal=[]
-    img_merged1 = jigsaw(images[0:3],direction="horizontal")
-    img_merged2 = jigsaw(images[3:6],direction="horizontal")
-    img_merged3 = jigsaw(images[6:9],direction="horizontal")
-    img_merged4 = jigsaw(images[9:11],direction="horizontal")
-    img_horizontal.append(img_merged1)
-    img_horizontal.append(img_merged2)
-    img_horizontal.append(img_merged3)
-    img_horizontal.append(img_merged4)
-    img_merged=jigsaw(img_horizontal)
-    cv2.imwrite("/home/zhaobenyan/data/dw_test_new/images_merged/merged_gauss_attack_try.png", img_merged)
+    for j in range(m):
+        images_h=[]
+        for i in range(j*n+1,(j+1)*n+1):      
+            img = cv2.imread(dir+"/contrast{}/time_0.png".format(i))
+            images_h.append(img)
+        image = jigsaw(images_h,direction="horizontal", gap=1)
+        images.append(image)
+    img_merged= jigsaw(images,direction="vertical", gap=1)
+    cv2.imwrite(dir_out+"/time_0_merged.png", img_merged)
 
-
-def merge_single_neuro():
-    #将/home/zhaobenyan/Attack_robustness/ourmodel/Repeatability_single_neuro.py生成的图片纵向合并为一张
-    images=[]
-    for i in range(1,11):      
-        img = cv2.imread("/home/zhaobenyan/data/dw_test_new/Repeatability_contrast/Contrast{}/repeat_single_neuro.png".format(i))
-        images.append(img)
-    
-    img_merged = jigsaw(images)
-    cv2.imwrite("/home/zhaobenyan/data/dw_test_new/images_merged/merged_single_neuro.png", img_merged)
-
-def show_grating():
-    #展示不同contrast的grating
-    images=[]
-    for i in range(1,11):      
-        img = cv2.imread("/home/zhaobenyan/data/resource_contrast32_new/static_color-grid_{}_1.png".format(i))
-        images.append(img)
-    img_horizontal=[]
-    img_merged1 = jigsaw(images[0:5],direction="horizontal", gap=1)
-    img_merged2 = jigsaw(images[5:10],direction="horizontal", gap=1)
-    img_horizontal.append(img_merged1)
-    img_horizontal.append(img_merged2)
-    img_merged=jigsaw(img_horizontal,direction="vertical", gap=1)
-    cv2.imwrite("/home/zhaobenyan/data/dw_test_new/images_merged/grating2x5.png", img_merged)
 
 if __name__ == '__main__':
+
     #merge_noise_test()
     #merge_single_neuro()
-    show_grating()
+    #dir='/home/zhaobenyan/dataset/output/imagenet32'
+    dir='/home/zhaobenyan/dataset/output/grating_32x32'
+    dir_out='/home/zhaobenyan/dataset/output/grating_32x32/merged'
+    merge_images(2,5,dir,dir_out)

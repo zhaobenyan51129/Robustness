@@ -1,0 +1,25 @@
+注：/home/zhaobenyan/repos/patchV1/src/util/sampler.py 里面77-78行随机种子固定
+
+1.ourmodel_repeat.py为调用戴老师模型的接口,输入为grating所在路径
+  ourmodel_image.py也是调用戴老师模型的接口,输入为image拉直之后的array
+  ourmodel_attack.py,也是调用戴老师模型的接口,输入为image输入图片[size,size,3]
+  注：以上三个ourmodel只是输入不同，根据不同需求选择，例如重复性实验时输入是grating的.bin文件，用第一个
+      将imagenet输入到戴老师模型时用第二个
+      进行噪声攻击的时候输入[size,size,3]的tensor,所以用第三个
+      注意修改其中的文件路径
+
+2.repeat_dw.py为对grating/draftgrating进行重复性测试生成数据的脚本,会在输出路径dir下生成一个fr_time{}.npz文件，储存该图片重复十次的fr
+  repeat_image.py 为对imagenet32进行重复性测试生成数据的脚本
+
+3.max_min.py为对重复测试十次时对fr的最大最小值进行分析的脚本
+
+4.normed.py读取某一张grating进行重复性测试（设置为重复10次）的数据并计算取范数之后的数据
+  画图1:plot_repeat(fr,error)横坐标为重复的次数（设置为10），纵坐标1为error的二范数，纵坐标2为fr的二范数
+  画图2:plot_contrast横坐标为contrast的值，纵坐标1为error的二范数(重复3次，数据为error除以了第0次fr二范数的数据），纵坐标2为第0次fr的二范数
+  画图3：plot_time横坐标为时间（单位s), 纵坐标1为error的二范数(重复三次），纵坐标2为第0次fr的二范数
+  画图4：error的分布（以0.1为间隔）
+
+注：进行重复性实验调用顺序为ourmodel_repeat.py-->repeat_dw.py生成数据
+    -->normed.py(先执行compute_norm函数计算并储存求二范数之后的数据,再根据需要画图)
+
+

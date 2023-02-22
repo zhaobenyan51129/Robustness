@@ -2,3 +2,7 @@ ourmodel:戴老师模型的实验
 tools:一些工具脚本（合并图像，生成video等）
 vit_model:vit模型的实验
 ljy_test:卢佳怡学姐的实验
+config:拉取配置戴老师模型
+repeat:重复性实验
+debug:debug及写代码时调试的文件
+datas:一些要用的数据文件
