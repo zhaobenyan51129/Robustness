@@ -33,10 +33,10 @@ def minimalTC():
     os.system(f'cd {src_dir} && ./minimalTC')
 
 def main():
-    #compile()
-    #resource()
-    #retine()
-    #patch()
+    compile()
+    resource()
+    retine()
+    patch()
     minimalTC()
 
 main()
