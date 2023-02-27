@@ -12,6 +12,7 @@
   repeat_image.py 为对imagenet32进行重复性测试生成数据的脚本
 
 3.max_min.py为对重复测试十次时对fr的最大最小值进行分析的脚本
+  lgn.py为对重复测试十次时对lgn输出进行分析的脚本
 
 4.normed.py读取某一张grating进行重复性测试（设置为重复10次）的数据并计算取范数之后的数据
   画图1:plot_repeat(fr,error)横坐标为重复的次数（设置为10），纵坐标1为error的二范数，纵坐标2为fr的二范数

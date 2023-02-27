@@ -1,15 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from repeat_dw import read_output
 np.set_printoptions(threshold=np.inf)  #使输出数据完整显示
 
-def read_output(file_name):
-    with np.load(file_name) as f:
-        fr=f['fr']
-    return fr
-
 #读取数据n_pic:图片数量 repeat：重复次数 dir:读取数据的目录，time:实验时间
-def read_data(n_pic,repeat,dir,time):
+def read_data_fr():
     fr=[]
     for k in range(n_pic):
         for i in range(repeat):
@@ -18,7 +14,7 @@ def read_data(n_pic,repeat,dir,time):
     return fr
 
 #计算数据 储存为一个列表，长度为n_pin,列表的每一项为一个（3,3840）的array，分别储存每张图片的fr的mean、max、min（按mean升序排列）
-def compute_data(n_pic,repeat,fr_vector):
+def compute_sorted_fr(fr_vector):
     fr = np.array(fr_vector).reshape(n_pic, repeat, -1)
     fr_mean = np.mean(fr,axis=1)
     fr_max = np.max(fr,axis=1)
@@ -31,7 +27,7 @@ def compute_data(n_pic,repeat,fr_vector):
     return  sorted_data_list
 
 #画图 按照mean上升排列，max与min之间用红色填充，虚线为均值
-def plot_max_min(n_pic,sorted_data,time,dir_output):
+def plot_max_min(sorted_data):
     fig = plt.figure(figsize=(50,20),dpi=200)
     for i in range(n_pic):
         sorted_mean, sorted_max,sorted_min = zip(*sorted_data[i])
@@ -42,11 +38,11 @@ def plot_max_min(n_pic,sorted_data,time,dir_output):
         plt.ylim([0,60])
         plt.title('contrast={}'.format((i+1)/20),fontsize='large',loc='left',fontweight='bold',style='italic',family='monospace')
     plt.suptitle('time={}s'.format(time), ha = 'left',fontsize = 30,weight = 'extra bold')
-    plt.savefig(os.path.join(dir_output+'/merged', 'max_min_mean{}.png'.format(time)))#第一个是指存储路径，第二个是图片名字
+    plt.savefig(os.path.join(dir+'/merged', 'max_min_mean{}.png'.format(time)))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
 #fr十次均值的分布
-def plot_fr_distribution(n_pic,sorted_data,time,dir_output):
+def plot_fr_distribution(sorted_data):
     fig = plt.figure(figsize=(50,20),dpi=200)
     for i in range(n_pic):
         sorted_mean, sorted_max,sorted_min = zip(*sorted_data[i])
@@ -54,17 +50,16 @@ def plot_fr_distribution(n_pic,sorted_data,time,dir_output):
         plt.hist(sorted_mean,bins=np.arange(0,60,1),rwidth=0.7)
         plt.title('contrast={}'.format((i+1)/20),fontsize='large',loc='left',fontweight='bold',style='italic',family='monospace')
     plt.suptitle('time={}s'.format(time), ha = 'left',fontsize = 30,weight = 'extra bold')
-    #plt.savefig(os.path.join(dir_output+'/merged', 'fr_distribution_time{}.png'.format(time)))
-    plt.savefig(os.path.join(dir_output+'/merged', 'fr_distribution_noseed.png'))#第一个是指存储路径，第二个是图片名字
+    plt.savefig(os.path.join(dir+'/merged', 'fr_distribution_time{}.png'.format(time)))
     plt.close()
 
 #times=[1,2,3,4,5]  #运行时间
 times=[1]
 n_pic=10      #图片个数
 repeat=10    #重复次数
-dir='/home/zhaobenyan/dataset/output/grating_32x32_noseed'    #需要读取的数据所在路径
+dir='/home/zhaobenyan/dataset/output/driftgrating_32x32'    #需要读取的数据所在路径
 for time in times:
-    fr_vector=read_data(n_pic,repeat,dir,time)
-    sorted_data_list=compute_data(n_pic,repeat,fr_vector)
-    plot_fr_distribution(n_pic,sorted_data_list,time,dir)
+    fr_vector=read_data_fr()
+    sorted_data_list=compute_sorted_fr(fr_vector)
+    plot_fr_distribution(sorted_data_list)
     #plot_max_min(n_pic,sorted_data_list,time,dir)

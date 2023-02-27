@@ -3,18 +3,13 @@ import numpy as np
 import time
 import os
 import collections
-
+from repeat_dw import read_output
 np.seterr(divide='ignore',invalid='ignore')#忽略出现0/0时的警告
 np.set_printoptions(threshold=np.inf)  #使输出数据完整显示
 
-#读取重复十次之后的数据
-def read_output(file_name):
-    with np.load(file_name) as f:
-        fr=f['fr']
-    return fr
 
 #计算范数
-def compute_norm(dir,time,Norm=None):
+def compute_norm(dir,Norm=None):
     '''
     计算fr及误差的范数，默认为二范数
     dir:grating重复十次的数据所在地址
@@ -29,7 +24,7 @@ def compute_norm(dir,time,Norm=None):
     np.savez(dir+'/output_norm_{}'.format(time),fr_norm=fr_norm,error_norm=error_norm)#储存数据
 
 #读取计算范数之后的数据，norm文件
-def read_norm(dir,time):
+def read_norm(dir):
     with np.load(dir+'/output_norm_{}.npz'.format(time)) as f:
         fr_norm=f['fr_norm']
         error_norm=f['error_norm']
@@ -60,18 +55,18 @@ def plot_repeat(fr,error):
     for a, b in zip(x, np.around(fr,2)):  # 添加这个循坏显示坐标
         plt.text(a, b, b,color = "b", ha='center', va='bottom', fontsize=10)
 
-def plot1(dir,time):
+def plot1(dir):
     for i in range(10):
         file=dir+'/contrast{}'.format(i+1)
-        #compute_norm(file,time)  #计算范数，运行一次即可，后续实验可以直接读取
-        fr_norm,error_norm=read_norm(file,time)
+        #compute_norm(file)  #计算范数，运行一次即可，后续实验可以直接读取
+        fr_norm,error_norm=read_norm(file)
         plot_repeat(fr_norm,error_norm)
         plt.savefig(os.path.join(file, 'repeat_{}.png'.format(time)))#第一个是指存储路径，第二个是图片名字
         plt.close()
 
 
 #print('-----------------------------------实验2：error随contast的变化-----------------------------------------')
-def get_data_contrast(dir,time):
+def get_data_contrast(dir):
     error=[]
     y2=[]
     for i in range(10):
@@ -82,7 +77,7 @@ def get_data_contrast(dir,time):
     error=np.array(error).T #(10,10)
     return error,y2
 
-def plot_contrast(error,y2,error_mean,time):
+def plot_contrast(error,y2,error_mean):
     '''画图2：横坐标为contrast的值，
     纵坐标1为error的二范数(重复3次，数据为error除以了第0次fr二范数的数据），
     纵坐标2为第0次fr的二范数
@@ -110,13 +105,13 @@ def plot_contrast(error,y2,error_mean,time):
     
 
 def plot2(dir,time):
-    error,y2=get_data_contrast(dir,time)
+    error,y2=get_data_contrast(dir)
     #print(error)
     error_mean=np.mean(error[1:],axis=0)
     #print('error_mean',error_mean)
-    plot_contrast(error,y2,error_mean,time)
+    plot_contrast(error,y2,error_mean)
     #plt.savefig(os.path.join(dir+'/merged', 'contrast_time{}s.png'.format(time)))#第一个是指存储路径，第二个是图片名字
-    plt.savefig(os.path.join(dir+'/merged', 'contrast_noseed.png'))
+    plt.savefig(os.path.join(dir+'/merged', 'contrast.png'))
     plt.close()
 
 #print('----------------------------实验3：error随时间的变化-----------------------------')
@@ -168,11 +163,11 @@ def plot3(dir):
         error,y2,error_mean=get_data_time(file)
         print(len(error_mean))
         plot_time(error,y2,error_mean,i)
-        plt.savefig(os.path.join(file,'time_0.png'))#第一个是指存储路径，第二个是图片名字
+        plt.savefig(os.path.join(file,'time.png'))#第一个是指存储路径，第二个是图片名字
         plt.close()
 
 #print('--------------------------------实验4，error的分布---------------------------')
-def plot_error_distribution(dir,time):
+def plot_error_distribution(dir):
     fig = plt.figure(figsize=(50,20),dpi=200)
     for i in range(10):
         file=dir+'/contrast{}'.format(i+1)
