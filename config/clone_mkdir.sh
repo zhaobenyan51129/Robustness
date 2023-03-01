@@ -8,7 +8,7 @@ conda activate neuro
 
 repos=$HOME/repos
 dataset=$HOME/dataset
-bin=$HOME/dataset/bin
+bin=$HOME/bin
 resource=$dataset/resource
 setup=$dataset/setup
 patchfast=$dataset/patchfast

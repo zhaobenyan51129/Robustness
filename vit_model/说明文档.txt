@@ -1,7 +1,0 @@
-此文件夹为在vit模型上进行gauss噪声攻击分析鲁棒性的实验
-1.vit_model.py为使用的vit模型，一般不需要改动，直接调用即可，files/vit_base_patch16_224.pth是它的权重
-2.attack_vit.py为调用vit模型进行分析的脚本，主要包括gauss噪声攻击和画图两个实验类
-3.Noise_test.py为进行实验的脚本，在此处输入数据
-4.files/images_labels_try是从imagenet(1000类)筛选出的100张图片，在Noise_test.py中作为样本输入
-5.files/normal_noise.pth是生成的gauss噪声，在attack_vit.py中需要调用
-6.Multigraph_attack.py为进行多图攻击及生成噪声的脚本

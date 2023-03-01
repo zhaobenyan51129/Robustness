@@ -4,7 +4,7 @@ import os
 import time
 np.set_printoptions(threshold=np.inf)  #使输出数据完整显示
 src_dir='/home/zhaobenyan/repos/patchV1/src/'  #minimalTC所在文件夹
-patchfast='/home/zhaobenyan/dataset/patchfast/'#输出数据（读取fr的.bin文件）所在文件夹
+patchfast='/home/zhaobenyan/dataset/patchfast/'#输出数据所在文件夹
 
 def ourmodel(image):
     '''

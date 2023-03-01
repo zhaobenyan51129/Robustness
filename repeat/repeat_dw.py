@@ -5,7 +5,7 @@ import os
 
 
 #得到fr file:输入grating/draftgrating所在路径  dir:fr文件保存路径 repeat:重复次数
-def get_fr(file,dir):
+def save_fr_lgn(file,dir):
     fr_list=[]
     lgn_list=[]
     for i in range(repeat):
@@ -49,6 +49,6 @@ if __name__ == "__main__" :
         #储存输出文件的路径
         dir='/home/zhaobenyan/dataset/output/driftgrating_{}x{}/contrast{}/'.format(size,size,i+1)
         path_exist(dir)
-        get_fr(file,dir)
+        save_fr_lgn(file,dir)
 
 

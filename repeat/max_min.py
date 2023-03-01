@@ -1,5 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+from pandas import Series,DataFrame
+import seaborn as sns
+import palettable #python颜色库
 import os
 from repeat_dw import read_output
 np.set_printoptions(threshold=np.inf)  #使输出数据完整显示
@@ -25,6 +29,25 @@ def compute_sorted_fr(fr_vector):
         sorted_zip = sorted(zip_mean_max_min, key=lambda x:x[0])
         sorted_data_list.append(sorted_zip)
     return  sorted_data_list
+
+#10次3840个neuro的fr的热图，按照第1次fr从小到大排序
+def plot_hotmap(fr_vector):
+    fr = np.array(fr_vector).reshape(n_pic, repeat, -1) #(10,10,3840)
+    fig = plt.figure(figsize=(50,20),dpi=200)
+    for i in range(n_pic):
+        fr=fr[i]
+        sorted_fr = sorted(fr, key=lambda x:x[0])
+        ax = fig.add_subplot(2,5,i+1)
+        plt.plot(np.arange(3840),sorted_mean,linewidth=0.3)
+        plt.fill_between(np.arange(3840),sorted_max,sorted_min, color='r', alpha=.8, linewidth=0)
+        plt.xlim([0,4000])
+        plt.ylim([0,60])
+        plt.title('contrast={}'.format((i+1)/20),fontsize='large',loc='left',fontweight='bold',style='italic',family='monospace')
+    plt.suptitle('time={}s'.format(time), ha = 'left',fontsize = 30,weight = 'extra bold')
+    plt.savefig(os.path.join(dir+'/merged', 'max_min_mean{}.png'.format(time)))#第一个是指存储路径，第二个是图片名字
+    plt.close()
+    pass
+  
 
 #画图 按照mean上升排列，max与min之间用红色填充，虚线为均值
 def plot_max_min(sorted_data):
@@ -54,10 +77,11 @@ def plot_fr_distribution(sorted_data):
     plt.close()
 
 #times=[1,2,3,4,5]  #运行时间
-times=[1]
+times=[5]
 n_pic=10      #图片个数
 repeat=10    #重复次数
 dir='/home/zhaobenyan/dataset/output/driftgrating_32x32'    #需要读取的数据所在路径
+# dir='/home/zhaobenyan/dataset/output/grating_32x32'
 for time in times:
     fr_vector=read_data_fr()
     sorted_data_list=compute_sorted_fr(fr_vector)
