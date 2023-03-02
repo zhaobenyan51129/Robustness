@@ -81,13 +81,14 @@ def mk_path(path):#判断路径时候存在，不存在则创建
       
 def main():
       C = np.arange(0.05,0.55,0.05) # contrast
+      # C=np.array([0.45])
       #P = np.arange(0,1,1)#0 相位
-      P=np.array([np.pi])
+      P=np.array([0.5*np.pi])
       SF = np.arange(24,30,10)#24
       D = np.array([np.pi/6])  # 方向范围[0,pi]
       frameRate=1
       size=32     #图片大小
-      path = '/home/zhaobenyan/dataset/grating/grating_{}x{}_frameRate{}_phase=pi/'.format(size,size,frameRate) #保存生成的grating的地址
+      path = '/home/zhaobenyan/dataset/grating/gratingtry_{}x{}_frameRate{}_phase=pi/'.format(size,size,frameRate) #保存生成的grating的地址
       mk_path(path)
       generate_input(path,C,P,SF,D,frameRate,size)
 
