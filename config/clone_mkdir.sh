@@ -33,8 +33,9 @@ done
 #创建说明文档Documentation.txt对每个文件的内容进行说明
 echo "Begin to write our own Documentation.txt"
  
+#生成说明文档
 cat>$txt<<EOF
-bin:存放compile、gompile和rompile脚本生成的patch_fast、genCon和retino文件
+bin:存放compile、gompile和rompile脚本（这些脚本里面的地址要与bin所在地址对应）生成的patch_fast、genCon和retino文件
 resource:存放pinwheel_disk_tmp.py生产的数据
 setup:retino和genCon产生的数据
 patchfast:patch_fast(minimal.cfg、minimalTC) 产生的数据
@@ -63,3 +64,4 @@ if [ ! -d "patchV1" ];then
 else
       echo "The code has been cloned!"
 fi
+#问题：怎么通过脚本更改所有文件里面的路径并且适配不同服务器
