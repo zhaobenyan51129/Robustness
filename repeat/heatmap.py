@@ -30,28 +30,26 @@ def merge_data_fr():
     error_vector=np.array(error_list)
     return fr_vector, error_vector
 
-##读取固定time所有contrast第一次重复的数据，输出：(10,512*nt)
+##读取固定time所有contrast第一次重复的数据，输出：长为10（n_pic)的列表，每一项为（521，nt)的数组
 #时间不同nt不同，因此不能所有时间同时读取
 def merge_data_lgn(time):
     lgn_list=[] 
     for k in range(n_pic):
         lgn_vector=read_output(dir+'/contrast{}/lgn_time{}.npz'.format(k+1,time)) #521*nt
-        lgn_list.append(lgn_vector[0].flatten())
-    lgn_vector = np.array(lgn_list).reshape(n_pic, -1)
-    return lgn_vector
+        # lgn_list.append(lgn_vector[0].flatten())
+        lgn_list.append(lgn_vector[0])
+    # lgn_vector = np.array(lgn_list).reshape(n_pic, -1)
+    return lgn_list
 
-def compute_ratio_list(): 
-    ratio_list=[]
+#计算不同时间不同contrast的图片先lgn输出的fr（mean),输出为（5，10）的array,保存在二进制文件lgn_fr_vector.npz
+def compute_lgn_fr(): 
+    lgn_fr_list=[]
     for time in times:
-        lgn_vector=merge_data_lgn(time)
-        ratio_time=[]
-        for i in range(10):
-            ar,num=np.unique(lgn_vector[i],return_counts=True)
-            ratio=np.sum(num[1:])/len(lgn_vector[0])
-            ratio_time.append(ratio)
-        ratio_list.append(ratio_time)
-    np.savez(dir+'/ratio_list',ratio_list=ratio_list)
-    print(ratio_list)
+        lgn_vector=np.array(merge_data_lgn(time))#(10,512,8000)
+        lgn_fr_per_neuro=np.sum(lgn_vector,axis=2)/time #(10,512)
+        lgn_fr_mean=np.mean(lgn_fr_per_neuro,axis=1) #(10,) 每张图lgn所有neuro的平均放电率
+        lgn_fr_list.append(lgn_fr_mean)
+    np.savez(dir+'/lgn_fr_vector',lgn_fr_vector=np.array(lgn_fr_list))
 
 #对不同时间时，重复十次fr及其误差的热图fr_vector为上一个函数读出来的数据（5，10，10，3840）
 #画两张4x5的图
@@ -192,19 +190,19 @@ def plot_time_contrast(fr_vector,error_vector,mode):
     plt.savefig(os.path.join(dir+'/heatmap', 'time_contrast_{}'.format(mode)))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
-#不同时间和contrast下第一次重复,lgn spike不为0的比例
-def plot_lgn_ratio():
-    with np.load(dir+'/ratio_list.npz') as f:
-        ratio_list=f['ratio_list']
-    df=pd.DataFrame(ratio_list)
+#不同时间和contrast下第一次重复,lgn_fr_mean
+def plot_lgn_fr():
+    with np.load(dir+'/lgn_fr_vector.npz') as f:
+        lgn_fr_vector=f['lgn_fr_vector']
+    df=pd.DataFrame(lgn_fr_vector)
     df.columns=["%.2f"%i for i in list(np.arange(0.05,0.55,0.05))]
     df.index=[1,2,3,4,5]
-    df=df.apply(lambda x: x*100).round(4)
+    # df=df.apply(lambda x: x*100).round(4)
     fig = plt.figure(figsize=(5,3),dpi=200)
     ax=sns.heatmap(data=df,
                     cmap=plt.get_cmap('Greens'),
                     annot=True,
-                    fmt=".4f",
+                    fmt=".2f",
                     # fmt='%.4f%%' %(df*100),
                     annot_kws={'size':4,'weight':'normal', 'color':'black'},
                 )
@@ -217,7 +215,7 @@ def plot_lgn_ratio():
     cbar = ax.collections[0].colorbar #获取图例
     cbar.ax.tick_params(labelsize=3) #设置图例的字号
     plt.suptitle('heatmap_lgn', ha = 'left',fontsize = 8, weight = 'extra bold')
-    plt.savefig(os.path.join(dir+'/heatmap', 'heatmap_lgn'))#第一个是指存储路径，第二个是图片名字
+    plt.savefig(os.path.join(dir+'/heatmap', 'heatmap_lgn_fr'))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
 
@@ -225,12 +223,12 @@ if __name__ == "__main__" :
     times=[1,2,3,4,5]  #运行时间
     n_pic=10      #图片个数
     repeat=10    #重复次数
-    dir='/home/zhaobenyan/dataset/output/grating_32x32'    #需要读取的数据所在路径
-    fr_vector,error_vector=merge_data_fr()
+    dir='/home/zhaobenyan/dataset/output/driftgrating_32x32'    #需要读取的数据所在路径
+    # fr_vector,error_vector=merge_data_fr()
     # plot_fr_error(fr_vector)
-    plot_time_contrast(fr_vector,error_vector,mode='norm')
-    plot_time_contrast(fr_vector,error_vector,mode='mean')
-    # compute_ratio_list() #运行一次即可
-    # plot_lgn_ratio()
+    # plot_time_contrast(fr_vector,error_vector,mode='norm')
+    # plot_time_contrast(fr_vector,error_vector,mode='mean')
+    compute_lgn_fr() #运行一次即可
+    plot_lgn_fr()
     
 
