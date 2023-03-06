@@ -6,3 +6,4 @@ config:拉取配置戴老师模型
 repeat:重复性实验
 debug:debug及写代码时调试的文件
 datas:一些要用的数据文件
+requirements.txt:所有包
