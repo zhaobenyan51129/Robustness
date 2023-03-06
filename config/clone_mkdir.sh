@@ -64,4 +64,3 @@ if [ ! -d "patchV1" ];then
 else
       echo "The code has been cloned!"
 fi
-#问题：怎么通过脚本更改所有文件里面的路径并且适配不同服务器
