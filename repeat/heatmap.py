@@ -32,20 +32,20 @@ def merge_data_fr():
 
 ##读取固定time所有contrast第一次重复的数据，输出：长为10（n_pic)的列表，每一项为（521，nt)的数组
 #时间不同nt不同，因此不能所有时间同时读取
-def merge_data_lgn(time):
+def merge_data_lgn(time,repeat):
     lgn_list=[] 
     for k in range(n_pic):
         lgn_vector=read_output(dir+'/contrast{}/lgn_time{}.npz'.format(k+1,time)) #521*nt
         # lgn_list.append(lgn_vector[0].flatten())
-        lgn_list.append(lgn_vector[0])
+        lgn_list.append(lgn_vector[repeat])
     # lgn_vector = np.array(lgn_list).reshape(n_pic, -1)
     return lgn_list
 
-#计算不同时间不同contrast的图片先lgn输出的fr（mean),输出为（5，10）的array,保存在二进制文件lgn_fr_vector.npz
+#计算不同时间不同contrast的图片,lgn输出的fr（mean),输出为（5，10）的array,保存在二进制文件lgn_fr_vector.npz
 def compute_lgn_fr(): 
     lgn_fr_list=[]
     for time in times:
-        lgn_vector=np.array(merge_data_lgn(time))#(10,512,8000)
+        lgn_vector=np.array(merge_data_lgn(time,0))#(10,512,8000)
         lgn_fr_per_neuro=np.sum(lgn_vector,axis=2)/time #(10,512)
         lgn_fr_mean=np.mean(lgn_fr_per_neuro,axis=1) #(10,) 每张图lgn所有neuro的平均放电率
         lgn_fr_list.append(lgn_fr_mean)

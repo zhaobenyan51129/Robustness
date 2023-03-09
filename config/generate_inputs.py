@@ -27,7 +27,7 @@ print(SF)
 
 # color-drifting
 inputLMS = True
-range_deg = 0.0344#0.12672379774682216 # eccentricity from the origin
+range_deg = 0.0344#0.12672379774682216 # eccentricity from the origin ecc = 0.01024565897781334 
 print(acuity(range_deg))
 buffer_deg = acuity(range_deg)*4
 print(f'range_deg = {range_deg}, buffer_deg = {buffer_deg}')
@@ -80,8 +80,8 @@ def mk_path(path):#判断路径时候存在，不存在则创建
             os.makedirs(path)
       
 def main():
-      C = np.arange(0.05,0.55,0.05) # contrast
-      # C=np.array([0.45])
+      # C = np.arange(0.05,0.55,0.05) # contrast
+      C=np.array([0.45])
       #P = np.arange(0,1,1)#0 相位
       P=np.array([0.5*np.pi])
       SF = np.arange(24,30,10)#24

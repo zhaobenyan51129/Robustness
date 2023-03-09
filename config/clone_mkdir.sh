@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #source执行脚本 (不会开启子shell)
-source /home/zhaobenyan/miniconda3/etc/profile.d/conda.sh
+source $HOME/miniconda3/etc/profile.d/conda.sh
 # eval 执行多个脚本  用shell脚本激活conda虚拟环境
 eval "$(conda shell.bash hook)"
 conda activate neuro
@@ -55,10 +55,17 @@ fi
 cd $repos
 if [ ! -d "patchV1" ];then
       git init
+      git remote add origin https://github.com/g13/patchV1.git
       echo "start clone ..."
       git clone https://github.com/g13/patchV1.git &
       wait
-      echo "Clone complete!"
+      return_code=$? #保存返回码到变量
+      # 判断返回码并输出
+      if [ $return_code -eq 0 ]; then
+            echo "Cloned successfully!"
+      else
+            echo "Cloning failed..."
+      fi
       sleep 3;cd $repos/patchV1;pwd  #这里要cd之后再切换分支，否则会报错
       git pull origin minimal;git checkout -b minimal;git branch
 else
