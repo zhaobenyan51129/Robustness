@@ -29,7 +29,7 @@ print(SF)
 inputLMS = True
 range_deg = 0.0344#0.12672379774682216 # eccentricity from the origin ecc = 0.01024565897781334 
 print(acuity(range_deg))
-buffer_deg = acuity(range_deg)*4
+buffer_deg = acuity(range_deg)*4  #*2
 print(f'range_deg = {range_deg}, buffer_deg = {buffer_deg}')
 SF = 20
 TF = 8
@@ -87,7 +87,7 @@ def main():
       SF = np.arange(24,30,10)#24
       D = np.array([np.pi/6])  # 方向范围[0,pi]
       frameRate=1
-      size=32     #图片大小
+      size=3840     #图片大小
       path = '/home/zhaobenyan/dataset/grating/gratingtry_{}x{}_frameRate{}_phase=pi/'.format(size,size,frameRate) #保存生成的grating的地址
       mk_path(path)
       generate_input(path,C,P,SF,D,frameRate,size)
