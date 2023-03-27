@@ -51,6 +51,31 @@ def compute_lgn_fr():
         lgn_fr_list.append(lgn_fr_mean)
     np.savez(dir+'/lgn_fr_vector',lgn_fr_vector=np.array(lgn_fr_list))
 
+#计算lgn_fr的波动
+def compute_lgn_error_fr():
+    lgn_list=[]
+    for time in times:
+        for k in range(n_pic):
+            for i in range(repeat):
+                lgn_vector=read_output(dir+'/contrast{}/lgn_time{}.npz'.format(k+1,time)) 
+                lgn_fr=np.sum(lgn_vector,axis=2)/time #(10,512)
+                lgn_list.append(lgn_fr[i])
+    lgn_fr_vector = np.array(lgn_list).reshape(len(times),n_pic, repeat, -1)
+    error_list=[]
+    for time in times:
+        fr_tensor_time = lgn_fr_vector[time-1] #(10,10,3840)
+        error_pic=[]
+        for i in range(10):#n_pic):
+            fr= fr_tensor_time[i]#(10,3840)
+            error=np.abs(fr-fr[0])#(10,3840)
+            error_pic.append(error)
+        error_list.append(error_pic)
+    lgn_error_vector=np.array(error_list)
+    print(f"lgn_fr_vector={lgn_fr_vector.shape}")
+    print(f"lgn_error_vector={lgn_error_vector.shape}")
+    # return lgn_fr_vector, lgn_error_vector
+    np.savez(dir+'/lgn_fr_vector_all',lgn_fr_vector=lgn_fr_vector,lgn_error_vector=lgn_error_vector)
+
 #对不同时间时，重复十次fr及其误差的热图fr_vector为上一个函数读出来的数据（5，10，10，3840）
 #画两张4x5的图
 def plot_fr_error(fr_vector):
@@ -128,7 +153,7 @@ def plot_fr_error(fr_vector):
         plt.savefig(os.path.join(dir+'/heatmap', 'error,sorted by mean_error,time={}s'.format(time)))#第一个是指存储路径，第二个是图片名字
         plt.close()
 
-#fr_mean和fr_error随time和contrast的变化，fr_vector:(5,10,10,3840) mode:对3840个neuron取二范数还是均值
+#fr_mean和fr_error随time和contrast的变化，fr_vector:(5,10,10,3840) mode:对3840个neuron取二范数还是均值还是最大值
 def plot_time_contrast(fr_vector,error_vector,mode):
     #先对3480个nuero取平均再对重复次数取平均
     fr_mean=np.mean(fr_vector,axis=3)  #(5,10,10)
@@ -139,14 +164,22 @@ def plot_time_contrast(fr_vector,error_vector,mode):
     fr_norm=np.linalg.norm(fr_vector,axis=3)
     fr_norm=np.mean(fr_norm,axis=2)
     error_norm=np.linalg.norm(error_vector,axis=3)  #(5,10,10)
-    error_norm=np.mean(error_norm,axis=2) 
+    error_norm=np.mean(error_norm,axis=2)
+    #先对3480个nuero取max再对重复次数取平均
+    fr_max=np.max(fr_vector,axis=3)
+    fr_max=np.mean(fr_max,axis=2)
+    error_max=np.max(error_vector,axis=3)  #(5,10,10)
+    error_max=np.mean(error_max,axis=2)  #（5，10）
 
     if mode =='mean':
         df_fr = pd.DataFrame(fr_mean)
         df_error=pd.DataFrame(error_mean)
-    else:
+    elif mode =='norm':
         df_fr = pd.DataFrame(fr_norm)
         df_error=pd.DataFrame(error_norm)
+    else:
+        df_fr = pd.DataFrame(fr_max)
+        df_error=pd.DataFrame(error_max)
     #对fr
     fig = plt.figure(figsize=(10,3),dpi=200)
     fig.add_subplot(1,2,1)
@@ -187,7 +220,7 @@ def plot_time_contrast(fr_vector,error_vector,mode):
     cbar2.ax.tick_params(labelsize=3) #设置图例的字号
     plt.title("error",fontsize = 6)
     plt.suptitle('time_contrast_{}'.format(mode), ha = 'left',fontsize = 8, weight = 'extra bold')
-    plt.savefig(os.path.join(dir+'/heatmap', 'time_contrast_{}'.format(mode)))#第一个是指存储路径，第二个是图片名字
+    plt.savefig(os.path.join(dir+'/heatmap', 'lgn_time_contrast_{}'.format(mode)))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
 #不同时间和contrast下第一次重复,lgn_fr_mean
@@ -218,6 +251,42 @@ def plot_lgn_fr():
     plt.savefig(os.path.join(dir+'/heatmap', 'heatmap_lgn_fr'))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
+def Plot_Log_Log_fig(mode):
+    if mode=='lgn':
+        with np.load(dir+'/lgn_fr_vector_all.npz') as f:
+            fr_vector=f['lgn_fr_vector']#(5, 10, 10, 512)
+            # error_vector=f['lgn_error_vector']#(5, 10, 10, 512)
+    elif mode=='v1_fr':
+        fr_vector,_=merge_data_fr()
+    else: #v1_error
+        _,fr_vector=merge_data_fr()
+    
+    fr_mean=np.mean(fr_vector,axis=3)  #(5,10,10)
+    fr_mean=np.mean(fr_mean,axis=2)    #(5,10)
+    times=np.array([1,2,3,4,5])
+    # 对数转换
+    time_log = np.log10(times)
+    data_log = np.log10(fr_mean)
+    # 计算系数
+    coefficients = np.polyfit(time_log, data_log, 1)
+    print(coefficients)
+    fig, ax = plt.subplots(figsize=(5,3.5),dpi=200)
+    for i in range(10):
+        ax.plot(time_log, data_log[:,i], label='contrast={}'.format((i+1)/20))
+        ax.text(time_log[0], data_log[0,i], 'y={}x+{}'.format('{:.4f}'.format(coefficients[0,i]),'{:.4f}'.format(coefficients[1,i])), fontsize=7)  # 在第一个点处添加文本
+    ax.set_xlabel('Log(time)',fontsize = 8)
+    ax.set_ylabel('Log(fr_mean)',fontsize = 8)
+    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=8)
+    # 生成图例并放在右侧
+    legend = plt.figlegend(*ax.get_legend_handles_labels(), loc='center right',prop={'size': 8})
+    # 调整曲线图和图例图的间距
+    fig.subplots_adjust(right=0.75)
+    legend.set_bbox_to_anchor((1, 0.5))
+    plt.suptitle('log_log_{}'.format(mode), ha = 'left',fontsize = 8, weight = 'extra bold')
+    plt.savefig(os.path.join(dir+'/heatmap', 'log_log_{}'.format(mode)))#第一个是指存储路径，第二个是图片名字
+    plt.close()
+
 
 if __name__ == "__main__" :
     times=[1,2,3,4,5]  #运行时间
@@ -228,7 +297,19 @@ if __name__ == "__main__" :
     # plot_fr_error(fr_vector)
     # plot_time_contrast(fr_vector,error_vector,mode='norm')
     # plot_time_contrast(fr_vector,error_vector,mode='mean')
-    compute_lgn_fr() #运行一次即可
-    plot_lgn_fr()
+    # plot_time_contrast(fr_vector,error_vector,mode='max')
+    # compute_lgn_fr() #运行一次即可
+    # plot_lgn_fr()
+    # compute_lgn_error_fr()
+    # with np.load(dir+'/lgn_fr_vector_all.npz') as f:
+    #     lgn_fr_vector=f['lgn_fr_vector']
+    #     lgn_error_vector=f['lgn_error_vector']
+    # plot_time_contrast(lgn_fr_vector,lgn_error_vector,mode='norm')
+    # plot_time_contrast(lgn_fr_vector,lgn_error_vector,mode='mean')
+    # plot_time_contrast(lgn_fr_vector,lgn_error_vector,mode='max')
+    Plot_Log_Log_fig('lgn')
+    Plot_Log_Log_fig('v1_fr')
+    # Plot_Log_Log_fig('v1_error')
+
     
 
