@@ -31,6 +31,8 @@ VERSION='v1.2'
 data_save_path='/home/zhaobenyan/model/data_save/auto_manage/' #自己设定，数据保存文件夹 以‘/’结尾 
 img_save_path='/home/zhaobenyan/model/data_save/img_save/' #自己设定，是Usave_img的根目录 
 model_log_path='/home/zhaobenyan/model/data_save/log/' #自己设定,存放戴老师模型的输出，可以通过观察是否有一个到100%的进度条来判断模型运行是否正常 
+gratings_path='/home/zhaobenyan/model/data_save/gratings/' #generate.py里面生成grating的路径
+
 sleep_time=0.01 #线程连续启动时的等待时间参数，调参时使用，现在我应该调好了（如果时间间隔过短，则patch_fast会都选中同一GPU导致计算资源浪费）
 log_on=False #开启log方便调试
 
@@ -116,18 +118,19 @@ def Uget_Image_Array(C, P, SF, D, frameRate, size):
     shutil.rmtree(path)
     return image_array
 
+#读取输出LGN_spike_time:[521,8000], fr:[3840,1],
 def read_spike(file):
-   with open(file) as f:
-      sampleSize = np.fromfile(f, 'u4', 1)[0] #一共5120
-      sample_t0, sample_t1 = np.fromfile(f, 'f4', 2)#t0是开始时间，t1是结束时间，我一共跑了1s
-      nt = np.fromfile(f, 'u4', 1)[0]
-      nLGN = np.fromfile(f, 'u4', 1)[0]
-      LGN_spike_time = np.fromfile(f, 'u4', nLGN*nt)
-      sampleID = np.fromfile(f, 'u4', sampleSize)#id排序是顺序的
-      sample_spikeCount = np.fromfile(f, 'u4', sampleSize)
-      fr = sample_spikeCount/(sample_t1-sample_t0)*1000
-   LGN_spike_time = LGN_spike_time.reshape((nt,nLGN)).T
-   return LGN_spike_time,fr
+    with open(file) as f:
+        sampleSize = np.fromfile(f, 'u4', 1)[0] #一共5120
+        sample_t0, sample_t1 = np.fromfile(f, 'f4', 2)#t0是开始时间，t1是结束时间，我一共跑了1s
+        nt = np.fromfile(f, 'u4', 1)[0]
+        nLGN = np.fromfile(f, 'u4', 1)[0]
+        LGN_spike_time = np.fromfile(f, 'f4', nLGN*nt)
+        sampleID = np.fromfile(f, 'u4', sampleSize)#id排序是顺序的
+        sample_spikeCount = np.fromfile(f, 'u4', sampleSize)
+        fr = sample_spikeCount/(sample_t1-sample_t0)*1000
+    LGN_spike_time = LGN_spike_time.reshape((nt,nLGN)).T
+    return LGN_spike_time,fr
 
 def run_model(resource_queue,res_dic,res_tag,run_time=1,image=None,x1=None,x2=None,x3=None,x4=None,x5=None):
     this_success=False
@@ -544,7 +547,16 @@ def now_time_str():#格林威治时间
     return current_time
 
 
-
+#读取grating的数据  file:文件路径 static_color-grid_{}_cfg.bin类型的文件
+def read_grating_cfg(file):
+    with open(file) as f: #可以去查查with是干嘛的，它是以防你忘记关掉文件，这种表达会比较好
+        sf = np.fromfile(f,'f4',1)[0] #为啥是np.fromfile（。。。）[0],因为用np命令的读出来是array，其实我们只是要他的元素
+        ori = np.fromfile(f,'f4',1)[0]
+        phase = np.fromfile(f,'f4',1)[0]
+        contrast = np.fromfile(f,'f4',1)[0] #一般读取到contrast就停了
+        #crest = np.fromfile(f,'f4',3)  #波峰
+        #valley = np.fromfile(f,'f4',3) #波谷
+    return sf, ori, phase, contrast
 #老的，不用了，但是留着，以后改了需求可能用到
 # def Uget_Image_Response(image, repeat_times=1):
 #     outputs=[]
