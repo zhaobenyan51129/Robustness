@@ -2,8 +2,9 @@ ourmodel:戴老师模型的实验
 tools:一些工具脚本（合并图像，生成video等）
 vit_model:vit模型的实验
 ljy_test:卢佳怡学姐的实验
-config:拉取配置戴老师模型
+config:拉取配置戴老师模型(现在不用了，用lkh的脚本)
 repeat:重复性实验
-debug:debug及写代码时调试的文件
+debug:debug及写代码时调试的临时文件
 datas:一些要用的数据文件
-requirements.txt:所有包
+requirements.txt:环境下的所有包
+lgn_field:最开始是为了研究lgn和v1的感受野的问题，后面也有一些其他的实验
