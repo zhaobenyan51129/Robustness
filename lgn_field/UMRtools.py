@@ -557,6 +557,21 @@ def read_grating_cfg(file):
         #crest = np.fromfile(f,'f4',3)  #波峰
         #valley = np.fromfile(f,'f4',3) #波谷
     return sf, ori, phase, contrast
+
+#读取_{}.bin类型的文件，返回x_1,x_2,x_3,x_4,x_5,x_6
+def read_grating_bin(file):
+    with open(file) as f:
+        x_1 = np.fromfile(f, 'i4', 1)  #np.array([-1]).astype('i4').tofile(f) 
+        x_2 = np.fromfile(f, 'i4', 3)  #np.array([nFrame, npixel, npixel], dtype='i4').tofile(f)
+        nFrame=x_2[0]
+        size=x_2[1]
+        x_3 = np.fromfile(f, 'f4', 3)  #mean_value.astype('f4').tofile(f) mean_value = (c1+c2)/2
+        x_4 = np.fromfile(f, 'f4', 2)  #np.array([buffer_ecc, ecc], dtype='f4').tofile(f)
+        x_5 = np.fromfile(f, 'u4', 1)  #np.array([neye]).astype('u4').tofile(f)
+        x_6 = np.fromfile(f, 'f4', nFrame*size*size*3)  #LMS_seq.astype('f4').tofile(f)
+    return x_1,x_2,x_3,x_4,x_5,x_6
+
+
 #老的，不用了，但是留着，以后改了需求可能用到
 # def Uget_Image_Response(image, repeat_times=1):
 #     outputs=[]

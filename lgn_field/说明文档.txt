@@ -6,12 +6,12 @@ readPatchOutput.ipynb是用来试上面那个文件里面的函数是用来读�
 
 
 generate_input.ipynb是用来调试生成grating的函数的（调好了之后复制到下面的.py文件）
-generate.py是生成grating的脚本，其中的函数Get_fStimulus_Name(path,size)是为了获取生成grating的文件名，可以根据实 验需要修改给grating命名和获取文件名的方式，方便在实验时（例如pixel_time.ipynb）里面自动修改fStimulus
+generate.py是生成grating的脚本，其中的函数Get_fStimulus_Name(path,size)是为了获取生成grating的文件名，可以根据实 验需要修改给grating命名和获取文件名的方式，方便在实验时（例如pixel_time.py）里面自动修改fStimulus
 grating.py是生成grating时要调用的文件，不需要修改
 
 lgn.ipynb是研究lgn神经元分布和感受野的，（有些参数改变之后需要重新编译）
-pixel_time.ipynb是研究刺激时长和pixle大小对lgn和v1的fr的影响以及对运行时间的影响
-.bin文件都是pixel_time.ipynb生成的文件
+pixel_time.py是研究刺激时长和pixle大小对lgn和v1的fr的影响以及对运行时间的影响
+pixel_time.ipynb是上个文件调试时的副本
 
 plot.sh是运行原来ori.sh的里面的画图代码（因为现在没有用minimalTC,直接执行的minimal.cfg）
 python中可以使用以下命令运行：

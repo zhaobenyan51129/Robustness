@@ -28,6 +28,7 @@ def read_input_frames(fn):
         return nFrame, width, height, initL, initM, initS, frames, buffer_ecc, ecc, neye
     else:
         return nFrame, width, height, frames, ecc, neye
+    
 
 def read_cfg(fn, rn = False):
     with open(fn, 'rb') as f:
