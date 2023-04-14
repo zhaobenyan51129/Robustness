@@ -154,13 +154,7 @@ def Experiment_resolution(mode,repeat=10):
     v1_fr=v1_fr.reshape(resolution.shape[0],repeat, -1)
     run_time=run_time.reshape(resolution.shape[0],repeat, -1)
 
-    # if mode=="grey":
     np.savez(img_save_path+f'resolution_{mode}.npz',resolution=resolution, lgn_spike=lgn_spike, v1_fr=v1_fr, run_time=run_time)
-    # elif mode == "grating":
-    #     np.savez(img_save_path+'static_color-grid_resolution.npz',resolution=resolution, lgn_spike=lgn_spike,v1_fr=v1_fr, run_time=run_time)
-    # else:
-    #     np.savez(img_save_path+'static_color-driftgrid_resolution.npz',resolution=resolution, lgn_spike=lgn_spike,v1_fr=v1_fr, run_time=run_time)
-    # return resolution, lgn_spike, v1_fr, run_time
 
 # 设计实验:不同刺激时长对计算时间的影响  
 def Experiment_Simulation_duration(mode,repeat=10):
@@ -213,7 +207,7 @@ def Experiment_Simulation_duration(mode,repeat=10):
 
 #计算lgn_fr,可以去掉指定时间之前的数据，如果自变量（parameter）是刺激时长的话需要单独处理
 #读取文件与上面实验是生成的文件名一致
-def compute_lgn_fr(cut_off_time,mode,parameter,STD):
+def compute_lgn_fr(cut_off_time,mode,parameter):
     '''
     parameter=="Simulation_durations":说明Simulation_durations是变量,需要单独处理lgn_spike
     cut_off_time:截断时间,即不考虑该时间之前的spike,单位ms
@@ -248,7 +242,7 @@ def compute_lgn_fr(cut_off_time,mode,parameter,STD):
         cut=cut_off_time/dt #(cut_off_time/(nt*dt))*nt  
         #截断的模拟次数，例如模拟时长1s时模拟8000次，cut_off_time设置为200ms,那么只计算后6400次的spike
         lgn_fr=np.sum(lgn_spike[:,:,:,int(cut):],axis=3)/((time_ms-cut_off_time)/1000) #(2, 3, 512, nt)->(2,3,512)
-        print(f"lgn_fr={lgn_fr.shape}")
+        # print(f"lgn_fr={lgn_fr.shape}")
 
     lgn_fr_max=np.max(np.mean(lgn_fr,axis=1),axis=1)#(7, 10, 512)->(7,512)->(7,)
     v1_fr_max=np.max(np.mean(v1_fr,axis=1),axis=1)
@@ -260,18 +254,12 @@ def compute_lgn_fr(cut_off_time,mode,parameter,STD):
     lgn_std=np.std(np.mean(lgn_fr,axis=2),axis=1)#(7, 10, 512)->(7,10)->(7,)
     v1_std=np.std(np.mean(v1_fr,axis=2),axis=1)
     lgn_std_single=np.std(lgn_fr,axis=1)#(7, 10, 512)->(7,512)
-    v1_std_single=np.std(v1_fr,axis=1)  
+    v1_std_single=np.std(v1_fr,axis=1)  #(7,3840)
 
-    if parameter=="Simulation_duration":
-        if STD==True:
-            return Simulation_durations, lgn_std, v1_std ,lgn_std_single, v1_std_single
-        else:    
-            return Simulation_durations, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean
-    else:
-        if STD==True:
-            return resolution, lgn_std, v1_std ,lgn_std_single, v1_std_single
-        else:    
-            return resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean
+    if parameter=="Simulation_duration":    
+        return Simulation_durations, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single
+    else:   
+        return resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single
 
 def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name):
     # 为了方便，将所有向量转换为一维数组
@@ -292,14 +280,14 @@ def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,
 
     # 创建第一个纵坐标
     ax1.set_xlabel('resolution')
-    ax1.set_ylabel('lgn_fr(Hz)', fontsize=14, labelpad=10,color=color[0]).set_rotation(0)
+    # ax1.set_ylabel('lgn_fr(Hz)', fontsize=14, labelpad=10,color=color[0]).set_rotation(0)
     ax1.plot(resolution, lgn_fr_vector, color=color[0], marker='o')
     ax1.tick_params(axis='y', labelcolor=color[0])
     ax1.set_ylim([0, np.max(lgn_fr_vector)*1.2])
 
     # 创建第二个纵坐标
     ax2 = ax1.twinx()
-    ax2.set_ylabel('v1_fr(Hz)', fontsize=14, labelpad=30,color=color[1]).set_rotation(0)
+    # ax2.set_ylabel('v1_fr(Hz)', fontsize=14, labelpad=30,color=color[1]).set_rotation(0)
     ax2.plot(resolution, v1_fr_vector, color=color[1], marker='o')
     ax2.tick_params(axis='y', labelcolor=color[1])
     ax2.set_ylim([0, np.max(v1_fr_vector)*1.2])
@@ -307,7 +295,7 @@ def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,
     # 创建第三个纵坐标
     ax3 = ax1.twinx()
     ax3.spines.right.set_position(('axes', 1.2))
-    ax3.set_ylabel('run_time(s)', fontsize=14, labelpad=40,color=color[2]).set_rotation(0)
+    # ax3.set_ylabel('run_time(s)', fontsize=14, labelpad=40,color=color[2]).set_rotation(0)
     ax3.plot(resolution, run_time_vector, color=color[2], marker='o')
     ax3.tick_params(axis='y', labelcolor=color[2])
     ax3.set_ylim([0, np.max(run_time_vector)*1.1])
@@ -315,7 +303,7 @@ def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,
     # 创建第四个纵坐标  lgn_max全为0，不再展示
     ax4 = ax1.twinx()
     ax4.spines.right.set_position(('axes', 1.3))
-    ax4.set_ylabel('lgn_max(Hz)', fontsize=14, labelpad=40,color=color[4]).set_rotation(0)
+    # ax4.set_ylabel('lgn_max(Hz)', fontsize=14, labelpad=40,color=color[4]).set_rotation(0)
     ax4.plot(resolution, lgn_max_vector, color=color[4], marker='o')
     ax4.tick_params(axis='y', labelcolor=color[4])
     ax4.set_ylim([0, np.max(lgn_max_vector)+0.1])
@@ -324,7 +312,7 @@ def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,
     # 创建第五个纵坐标
     ax5 = ax1.twinx()
     ax5.spines.right.set_position(('axes', 1.4))
-    ax5.set_ylabel('v1_std(Hz)', fontsize=14, labelpad=40,color=color[3]).set_rotation(0)
+    # ax5.set_ylabel('v1_std(Hz)', fontsize=14, labelpad=40,color=color[3]).set_rotation(0)
     ax5.plot(resolution, v1_max_vector, color=color[3], marker='o')
     ax5.tick_params(axis='y', labelcolor=color[3])
     ax5.set_ylim([0, np.max(v1_max_vector)*1.3])
@@ -354,141 +342,124 @@ def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,
     plt.savefig(os.path.join(img_save_path, f'{pic_name}'))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
-def plot_heatmap_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name):
+
+def plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_name):
+    labels=[str(time) + "ms" for time in cut_off_times]
+
+    # 绘制曲线图
+    fig, axs = plt.subplots(2, 2, figsize=(25, 20),dpi=80)
    
-    # plt.errorbar(resolution, lgn_fr_max, yerr=lgn_std, label='lgn_fr_max', fmt='-o')
-    # plt.errorbar(resolution, v1_fr_max, yerr=v1_std, label='v1_fr_max', fmt='-o')
-    # plt.errorbar(resolution, lgn_fr_mean, yerr=lgn_std, label='lgn_fr_mean', fmt='-o')
-    # plt.errorbar(resolution, v1_fr_mean, yerr=v1_std, label='v1_fr_mean', fmt='-o')
-    # plt.errorbar(resolution, run_time_mean, label='run_time_mean', fmt='-o')
+    for index, cut_off_time in enumerate(cut_off_times):
+        axs[0,0].plot(Simulation_duration, lgn_mean[index], label=f'cut_off {cut_off_time}s')
+        axs[1,0].plot(Simulation_duration, lgn_max[index], label=f'cut_off {cut_off_time}s')
+        # 添加注释
+        x = Simulation_duration[0]  # x坐标为模拟时间的第一个值
+        axs[0,0].annotate(f'{cut_off_time}s', xy=(x, lgn_mean[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
+        axs[1,0].annotate(f'{cut_off_time}s', xy=(x, lgn_max[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
+    axs[0,0].legend()
+    axs[0,0].set_title("lgn_mean")
+    # axs[0,0].set_xticklabels(Simulation_duration)
+    axs[1,0].legend()
+    axs[1,0].set_title("lgn_max")
+    # axs[1,0].set_xticklabels(Simulation_duration)
+    
 
-    # plt.xlabel('Resolution')
-    # plt.ylabel('Value')
-    # plt.title('Relationship between Variables and Resolution')
-    # plt.legend()
+    #热力图    
+    sns.heatmap(lgn_mean, cmap=plt.get_cmap('Greens'), annot=True, fmt='.3f', xticklabels=Simulation_duration, yticklabels=labels, cbar=True, ax=axs[0,1])
+    sns.heatmap(lgn_max, cmap=plt.get_cmap('Greens'), annot=True, fmt='.3f', xticklabels=Simulation_duration, yticklabels=labels, cbar=True, ax=axs[1,1])
+    axs[0,1].set_title("lgn_mean")
+    axs[0,1].set_xticklabels(Simulation_duration)
+    axs[0,1].invert_yaxis()  #将y轴顺序颠倒
+    axs[0,1].set_yticklabels(axs[0,1].get_yticklabels(), rotation=0)  #旋转y轴坐标数据的方向
+    axs[1,1].set_title("lgn_max")
+    axs[1,1].set_xticklabels(Simulation_duration)
+    axs[1,1].invert_yaxis()  #将y轴顺序颠倒
+    axs[1,1].set_yticklabels(axs[1,1].get_yticklabels(), rotation=0)  #旋转y轴坐标数据的方向
 
-    x = resolution
-    plt.scatter(x, np.log(lgn_fr_max), label='lgn_fr_max')
-    plt.scatter(x, np.log(v1_fr_max), label='v1_fr_max')
-    plt.scatter(x, np.log(lgn_fr_mean), label='lgn_fr_mean')
-    plt.scatter(x, np.log(v1_fr_mean), label='v1_fr_mean')
-    plt.scatter(x, np.log(run_time_mean), label='run_time_mean')
-    plt.scatter(x, np.log(lgn_std), label='lgn_std')
-    plt.scatter(x, np.log(v1_std), label='v1_std')
+    plt.suptitle(f"{pic_name}", ha = 'left',fontsize = 30, weight = 'extra bold')
+    # plt.title(f'{pic_name}')
+    plt.savefig(os.path.join(img_save_path, f'{pic_name}'))#第一个是指存储路径，第二个是图片名字
+    plt.close()
 
-    plt.xlabel('Resolution')
-    plt.ylabel('Value (log scale)')
-    plt.title('Relationship between Variables and Resolution')
-    plt.legend()
-    plt.show()
+def plot_heatmap(variable,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name):
+    x=variable
+    data = np.array([lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean, lgn_std, v1_std])
+    labels = ['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time', 'lgn_std', 'v1_std']
+    # 归一化
+    data_norm = []
+    max_values = []
+    for i, label in enumerate(labels):
+        max_val = np.max(data[i])
+        data_norm.append(data[i] / max_val)
+        max_values.append(max_val)
+
+    # 画热力图
+    fig, axs = plt.subplots(nrows=1, ncols=2, figsize=(13, 5),gridspec_kw={'hspace': 5})
+    sns.heatmap(data_norm, cmap=plt.get_cmap('Greens'), annot=True, fmt='.3f', xticklabels=x, yticklabels=labels, cbar=True, ax=axs[0])
+
+    # 添加坐标轴标签和标题
+    axs[0].set_xlabel('simu_time')
+    axs[0].set_title('Normalized Data Heatmap')
+
+    # 右边的图
+    axs[1].barh(['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time', 'lgn_std', 'v1_std'], [lgn_fr_max.max(), v1_fr_max.max(), lgn_fr_mean.max(), v1_fr_mean.max(), run_time_mean.max(), lgn_std.max(), v1_std.max()])
+    axs[1].set_title('Bar Chart')
+    axs[1].invert_yaxis()  #将y轴顺序颠倒
+    # 标注每一个条形图的值
+    for i in range(len(['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time_mean', 'lgn_std', 'v1_std'])):
+        axs[1].text(max_values[i] + 0.01, i - 0.15, str(round(max_values[i], 3)), fontsize=10)
 
     plt.savefig(os.path.join(img_save_path, f'{pic_name}_heatmap'))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
 
-def plot_time_Simulation_durations(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name):
-    # 为了方便，我们将所有向量转换为一维数组
-    Simulation_duration = Simulation_duration.flatten()
-    lgn_fr_vector = lgn_fr_mean.flatten()
-    v1_fr_vector = v1_fr_mean.flatten()
-    lgn_max_vector = lgn_fr_max.flatten()
-    v1_max_vector = v1_fr_max.flatten()
-    run_time_vector = run_time_mean.flatten()
-
-    #颜色
-    # color=['#8ECFC9','#FFBE7A','#FA7F6F','#82B0D2','#BEB8DC','#E7DAD2']
-    color=['#2878b5','#c82423','#ff8884','#9ac9db','#f8ac8c',]
-
-    # 创建一个新的图形
-    fig, ax = plt.subplots(figsize=(8, 6))
-    plt.xticks(Simulation_duration)
-
-    # 创建第一个纵坐标
-    ax.set_xlabel('Simulation_duration_time(s)')
-    ax.set_ylabel('lgn_fr(Hz)', fontsize=14, labelpad=10,color=color[0]).set_rotation(0)
-    ax.plot(Simulation_duration, lgn_fr_vector, color=color[0], marker='o')
-    ax.tick_params(axis='y', labelcolor=color[0])
-    ax.set_ylim([0, np.max(lgn_fr_vector)*1.2])
-
-    # 创建第二个纵坐标
-    ax2 = ax.twinx()
-    ax2.set_ylabel('v1_fr(Hz)', fontsize=14, labelpad=30,color=color[1]).set_rotation(0)
-    ax2.plot(Simulation_duration, v1_fr_vector, color=color[1], marker='o')
-    ax2.tick_params(axis='y', labelcolor=color[1])
-    ax2.set_ylim([0, np.max(v1_fr_vector)*1.2])
-
-    # 创建第三个纵坐标
-    ax3 = ax.twinx()
-    ax3.spines.right.set_position(('axes', 1.2))
-    ax3.set_ylabel('run_time(s)', fontsize=14, labelpad=40,color=color[2]).set_rotation(0)
-    ax3.plot(Simulation_duration, run_time_vector, color=color[2], marker='o')
-    ax3.tick_params(axis='y', labelcolor=color[2])
-    ax3.set_ylim([0, np.max(run_time_vector)*1.2])
-
-    # 创建第四个纵坐标  lgn_max全为0，不再展示
-    ax4 = ax.twinx()
-    ax4.spines.right.set_position(('axes', 1.3))
-    ax4.set_ylabel('lgn_max(Hz)', fontsize=14, labelpad=40,color=color[4]).set_rotation(0)
-    ax4.plot(Simulation_duration, lgn_max_vector, color=color[4], marker='o')
-    ax4.tick_params(axis='y', labelcolor='yellow')
-    ax4.set_ylim([0, np.max(lgn_max_vector)+0.1])
-    # ax4.tick_params(labelright=False)  #隐藏纵坐标轴
-
-    # 创建第五个纵坐标
-    ax5 = ax.twinx()
-    ax5.spines.right.set_position(('axes', 1.4))
-    ax5.set_ylabel('v1_max(Hz)', fontsize=14, labelpad=40,color=color[3]).set_rotation(0)
-    ax5.plot(Simulation_duration, v1_max_vector, color=color[3], marker='o')
-    ax5.tick_params(axis='y', labelcolor=color[3])
-    ax5.set_ylim([0, np.max(v1_max_vector)*1.3])
-    # ax5.tick_params(labelright=False)
-
-    # 显示每个点的值，为了展示出来好看需要挨个儿调文字位置、箭头形状位置颜色等。
-    for i in range(len(Simulation_duration)):
-
-        if i % 2 == 0:
-            ax.annotate(f"{lgn_fr_vector[i]:.2f}", (Simulation_duration[i], lgn_fr_vector[i]), xytext=(Simulation_duration[i], lgn_fr_vector[i]*1.12),arrowprops=dict(facecolor=color[0], arrowstyle='fancy'),color=color[0])
-            ax2.annotate(f"{v1_fr_vector[i]:.2f}", (Simulation_duration[i], v1_fr_vector[i]), xytext=(Simulation_duration[i], v1_fr_vector[i]*0.9),arrowprops=dict(facecolor=color[1], arrowstyle='simple'),color=color[1])
-        else:
-            ax.annotate(f"{lgn_fr_vector[i]:.2f}", (Simulation_duration[i], lgn_fr_vector[i]), xytext=(Simulation_duration[i]-0.4, lgn_fr_vector[i]*1.05),arrowprops=dict(facecolor=color[0], arrowstyle='fancy'),color=color[0])
-            ax2.annotate(f"{v1_fr_vector[i]:.2f}", (Simulation_duration[i], v1_fr_vector[i]), xytext=(Simulation_duration[i], v1_fr_vector[i]*0.85),arrowprops=dict(facecolor=color[1], arrowstyle='simple'),color=color[1])
-
-        ax3.annotate(f"{run_time_vector[i]:.2f}", (Simulation_duration[i], run_time_vector[i]), xytext=(Simulation_duration[i], run_time_vector[i]-3),color=color[2])
-
-        ax4.annotate(f"{lgn_max_vector[i]:.2f}", (Simulation_duration[i], lgn_max_vector[i]), xytext=(Simulation_duration[i], lgn_max_vector[i]),color=color[4])
-
-        if i==0:
-            ax5.annotate(f"{v1_max_vector[i]:.4f}", (Simulation_duration[i], v1_max_vector[i]), xytext=(Simulation_duration[i]*0.8, v1_max_vector[i]*0.85),arrowprops=dict(facecolor=color[3], arrowstyle='wedge'),color=color[3])
-        else:
-            ax5.annotate(f"{v1_max_vector[i]:.4f}", (Simulation_duration[i], v1_max_vector[i]), xytext=(Simulation_duration[i]*0.95, v1_max_vector[i]*1.05),color=color[3])
-
-    # 显示图例
-    legend_labels = ['lgn_fr(Hz)', 'v1_fr(Hz)', 'run_time(s)','lgn_max(Hz)','v1_max(Hz)']
-    plt.legend([ax.get_lines()[0], ax2.get_lines()[0], ax3.get_lines()[0], ax4.get_lines()[0], ax5.get_lines()[0]], legend_labels, loc='center', bbox_to_anchor=(0.5, 0.1))
-    plt.title(f'{pic_name}')
-    plt.savefig(os.path.join(img_save_path, f'{pic_name}'))#第一个是指存储路径，第二个是图片名字
-    plt.close()
-
-
 if __name__ == "__main__" :
-    modes=['grey','grating','driftgrating']
-    cut_off_time=0
-    parameter='resolution'
-    # parameter='Simulation_duration'
+    # modes=['grey','grating','driftgrating']
+    modes=['driftgrating']
+    # parameter='resolution'
+    parameter='Simulation_duration'
     experiment = False #生成数据，运行一次即可，后面计算可以改为False
+    cut = False
     
     for mode in modes:
         pic_name=f'{parameter}_{mode}'
         if parameter=='resolution':
             if experiment==True:
                 Experiment_resolution(mode,repeat=10)
-            resolution,lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean,run_time_mean=compute_lgn_fr(cut_off_time,mode,parameter,False)
-            _, lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(cut_off_time,mode,parameter,True)
+            resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
             # plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
-            plot_heatmap_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
+            plot_heatmap(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
         else:
             if experiment==True:
                 Experiment_Simulation_duration(mode,repeat=10)
-            Simulation_duration,lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean,run_time_mean=compute_lgn_fr(cut_off_time,mode,parameter,False)
-            plot_time_Simulation_durations(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
+            # Simulation_duration,lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
+            # # plot_time_Simulation_durations(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
+            # print(f"lgn_std={lgn_std}")
+            # print(f"lgn_fr_single={lgn_std_single.shape}")
+            # print(f"v1_fr_single={v1_std_single.shape}")
+            # plot_heatmap(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
+
+            if cut:
+                cut_off_times=[0,40,80,120,160,200,240,180,320,360]
+                lgn_max_list=[]
+                lgn_mean_list=[]
+                for cut_off_time in cut_off_times:
+                    Simulation_duration, lgn_fr_max, _, lgn_fr_mean, _, _,_, _,_, _=compute_lgn_fr(cut_off_time,mode,parameter)
+                    lgn_max_list.append(lgn_fr_max)
+                    lgn_mean_list.append(lgn_fr_mean)
+                lgn_max=np.array(lgn_max_list)  #(len(cut_off_time),len(simu_time),i.e.(7,8)
+                lgn_mean=np.array(lgn_mean_list)
+                np.savez(img_save_path+f'cut_off_times_{mode}_long.npz',Simulation_duration=Simulation_duration, cut_off_times=cut_off_times, lgn_max=lgn_max, lgn_mean=lgn_mean)
+                print(f"lgn_max.shape={np.array(lgn_max_list).shape}")
+
+            else:    
+                with np.load(img_save_path+f'cut_off_times_{mode}_long.npz',allow_pickle=True) as data:
+                    Simulation_duration = data['Simulation_duration']
+                    cut_off_times = data ['cut_off_times']
+                    lgn_max = data['lgn_max']
+                    lgn_mean = data['lgn_mean']
+                print(f"Simulation_duration={Simulation_duration}")
+                pic_name0='cut_long_'+pic_name
+                plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_name0)
+
     print('--------------finished-------------------')
