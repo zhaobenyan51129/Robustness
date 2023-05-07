@@ -23,6 +23,11 @@ PATCHFAST_DIR='/home/zhaobenyan/model/patchfast/'
 RESOURCE_DIR='/home/zhaobenyan/model/resource/'
 SRC_DIR='/home/zhaobenyan/model/repos/patchV1/src/'
 BIN_DIR='/home/zhaobenyan/model/bin/'
+HOME_DIR = os.environ['HOME']
+MODEL_DIR=f"{HOME_DIR}/model/"
+SET_UP_DIR=f"{MODEL_DIR}setup/"
+REPOS_DIR=f"{MODEL_DIR}repos/"
+PATCHV1_DIR=f"{REPOS_DIR}patchV1/"
 MAX_RESOURCE=32 #最大并行数量，一般来说设置为显卡数量的整数倍，已经经过调优。注意：您仍可以并行超过这个数量，并且这样做是受到推荐的，因为它将更快。只不过超过Max后会有一定的串行情况。 
 VERSION='v1.2'
 #以上，通过buildup进行相应设定，改动请重新buildup

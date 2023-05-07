@@ -63,8 +63,8 @@ def generate_input(path,C,P,SF,D,frameRate,size,stimulus_name):
                               crest = np.array([0.5+c, 0.5-c, 0.5]) #contrast和正弦光栅的波峰、波谷在LMS颜色空间的关系
                               valley = np.array([0.5-c, 0.5+c, 0.5])
                               # video_fn = path +f'static_color-grid_con_{round(C[0]*100)}'
-                              video_fn = path +f'{stimulus_name}'
-                              cfg_fn = path + f'{stimulus_name}_cfg' #XXXcfg.bin储存每张图的参数，要关注存的时候的变量类型，是f4还是u4，怎么存就怎么读
+                              video_fn = path +f'{stimulus_name}_{n}'
+                              cfg_fn = path + f'{stimulus_name}_{n}_cfg' #XXXcfg.bin储存每张图的参数，要关注存的时候的变量类型，是f4还是u4，怎么存就怎么读
                               f = open(cfg_fn+ '.bin', 'wb') # sf,d,p,c
                               np.array([sf]).astype('f4').tofile(f)
                               np.array([orient*180/np.pi]).astype('f4').tofile(f) #generate_grating需要弧度制，但是我参数保存的角度制

@@ -12,7 +12,7 @@ np.set_printoptions(threshold=np.inf)  #使输出数据完整显示
 import warnings
 warnings.filterwarnings('ignore')
 
-#执行ourmodel的函数
+
 #生成grating
 def Generate_Gratings(C,P,SF,D,frameRate,size,stimulus_name):
     '''
@@ -41,7 +41,6 @@ def Run_Our_Model(frameRate, Simulation_duration,cfg_file_id, *args):
     log_on:是否打印一些中间值
     cfg_file_id: 指定使用的minimal配置文件编号,默认为空（即使用minimal.cfg作为cfg文件）
     repeat: 每组参数重复实验次数  
-     
     '''
     log_on=True
     if len(args) == 0:
@@ -213,6 +212,8 @@ def compute_lgn_fr(cut_off_time,mode,parameter):
     cut_off_time:截断时间,即不考虑该时间之前的spike,单位ms
     lgn_fr:(len(resolution), repeat, 512)  eg:(7,10,512)
     v1_fr:(len(resolution), repeat, 3840)
+    lgn_std_single:(len(resolution),512)
+    v1_std_single::(len(resolution),3840)
     '''
     dt=0.125
     if parameter=="Simulation_duration":
@@ -251,15 +252,15 @@ def compute_lgn_fr(cut_off_time,mode,parameter):
 
     run_time_mean=np.mean(np.mean(run_time,axis=1),axis=1)
 
-    lgn_std=np.std(np.mean(lgn_fr,axis=2),axis=1)#(7, 10, 512)->(7,10)->(7,)
-    v1_std=np.std(np.mean(v1_fr,axis=2),axis=1)
-    lgn_std_single=np.std(lgn_fr,axis=1)#(7, 10, 512)->(7,512)
-    v1_std_single=np.std(v1_fr,axis=1)  #(7,3840)
+    lgn_std_repeat=np.std(np.mean(lgn_fr,axis=2),axis=1)#(7, 10, 512)->(7,10)->(7,)
+    v1_std_repeat=np.std(np.mean(v1_fr,axis=2),axis=1)
+    lgn_std_single=np.std(np.mean(lgn_fr,axis=1),axis=1)#(7, 10, 512)->(7,512)->(7,)
+    v1_std_single=np.std(np.mean(v1_fr,axis=1),axis=1)  #(7,10,3840)->->(7,3840)->(7,)
 
     if parameter=="Simulation_duration":    
-        return Simulation_durations, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single
+        return Simulation_durations, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std_repeat, v1_std_repeat ,lgn_std_single, v1_std_single
     else:   
-        return resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single
+        return resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std_repeat, v1_std_repeat ,lgn_std_single, v1_std_single
 
 def plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name):
     # 为了方便，将所有向量转换为一维数组
@@ -350,12 +351,12 @@ def plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_nam
     fig, axs = plt.subplots(2, 2, figsize=(25, 20),dpi=80)
    
     for index, cut_off_time in enumerate(cut_off_times):
-        axs[0,0].plot(Simulation_duration, lgn_mean[index], label=f'cut_off {cut_off_time}s')
-        axs[1,0].plot(Simulation_duration, lgn_max[index], label=f'cut_off {cut_off_time}s')
+        axs[0,0].plot(Simulation_duration, lgn_mean[index], label=f'cut_off {cut_off_time}ms')
+        axs[1,0].plot(Simulation_duration, lgn_max[index], label=f'cut_off {cut_off_time}ms')
         # 添加注释
         x = Simulation_duration[0]  # x坐标为模拟时间的第一个值
-        axs[0,0].annotate(f'{cut_off_time}s', xy=(x, lgn_mean[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
-        axs[1,0].annotate(f'{cut_off_time}s', xy=(x, lgn_max[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
+        axs[0,0].annotate(f'{cut_off_time}ms', xy=(x, lgn_mean[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
+        axs[1,0].annotate(f'{cut_off_time}ms', xy=(x, lgn_max[index][0]), xytext=(0, 0), textcoords='offset points', ha='left', va='bottom')
     axs[0,0].legend()
     axs[0,0].set_title("lgn_mean")
     # axs[0,0].set_xticklabels(Simulation_duration)
@@ -381,9 +382,9 @@ def plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_nam
     plt.savefig(os.path.join(img_save_path, f'{pic_name}'))#第一个是指存储路径，第二个是图片名字
     plt.close()
 
-def plot_heatmap(variable,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name):
+def plot_heatmap(variable,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std_single, v1_std_single,pic_name):
     x=variable
-    data = np.array([lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean, lgn_std, v1_std])
+    data = np.array([lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean, lgn_std_single, v1_std_single])
     labels = ['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time', 'lgn_std', 'v1_std']
     # 归一化
     data_norm = []
@@ -402,7 +403,7 @@ def plot_heatmap(variable,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_m
     axs[0].set_title('Normalized Data Heatmap')
 
     # 右边的图
-    axs[1].barh(['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time', 'lgn_std', 'v1_std'], [lgn_fr_max.max(), v1_fr_max.max(), lgn_fr_mean.max(), v1_fr_mean.max(), run_time_mean.max(), lgn_std.max(), v1_std.max()])
+    axs[1].barh(['lgn_max', 'v1_max', 'lgn_mean', 'v1_mean', 'run_time', 'lgn_std', 'v1_std'], [lgn_fr_max.max(), v1_fr_max.max(), lgn_fr_mean.max(), v1_fr_mean.max(), run_time_mean.max(), lgn_std_single.max(), v1_std_single.max()])
     axs[1].set_title('Bar Chart')
     axs[1].invert_yaxis()  #将y轴顺序颠倒
     # 标注每一个条形图的值
@@ -414,10 +415,10 @@ def plot_heatmap(variable,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_m
 
 
 if __name__ == "__main__" :
-    # modes=['grey','grating','driftgrating']
-    modes=['driftgrating']
-    # parameter='resolution'
-    parameter='Simulation_duration'
+    modes=['grey','grating','driftgrating']
+    # modes=['driftgrating']
+    parameter='resolution'
+    # parameter='Simulation_duration'
     experiment = False #生成数据，运行一次即可，后面计算可以改为False
     cut = False
     
@@ -428,7 +429,7 @@ if __name__ == "__main__" :
                 Experiment_resolution(mode,repeat=10)
             resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
             # plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
-            plot_heatmap(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
+            plot_heatmap(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std_single, v1_std_single, pic_name)
         else:
             if experiment==True:
                 Experiment_Simulation_duration(mode,repeat=10)
@@ -449,17 +450,17 @@ if __name__ == "__main__" :
                     lgn_mean_list.append(lgn_fr_mean)
                 lgn_max=np.array(lgn_max_list)  #(len(cut_off_time),len(simu_time),i.e.(7,8)
                 lgn_mean=np.array(lgn_mean_list)
-                np.savez(img_save_path+f'cut_off_times_{mode}_long.npz',Simulation_duration=Simulation_duration, cut_off_times=cut_off_times, lgn_max=lgn_max, lgn_mean=lgn_mean)
+                np.savez(img_save_path+f'cut_off_times_{mode}.npz',Simulation_duration=Simulation_duration, cut_off_times=cut_off_times, lgn_max=lgn_max, lgn_mean=lgn_mean)
                 print(f"lgn_max.shape={np.array(lgn_max_list).shape}")
 
             else:    
-                with np.load(img_save_path+f'cut_off_times_{mode}_long.npz',allow_pickle=True) as data:
+                with np.load(img_save_path+f'cut_off_times_{mode}.npz',allow_pickle=True) as data:
                     Simulation_duration = data['Simulation_duration']
                     cut_off_times = data ['cut_off_times']
                     lgn_max = data['lgn_max']
                     lgn_mean = data['lgn_mean']
                 print(f"Simulation_duration={Simulation_duration}")
-                pic_name0='cut_long_'+pic_name
+                pic_name0='cut_'+pic_name
                 plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_name0)
 
     print('--------------finished-------------------')
