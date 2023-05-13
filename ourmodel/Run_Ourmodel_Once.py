@@ -61,7 +61,7 @@ def Modify_minimalcfg(minimal_cfg_file_path,plotdw,*args):
          # 将修改后的行重新写入到文件中
          file.writelines(lines)
 
-def Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulus_name, log_on = True, singleOri = True, plotdw=False):
+def Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulus_name, log_on = True, singleOri = True, plotdw=False, plotTC=False):
    '''
    frameRate:帧率（一秒几帧，=1就是静止的,>1就是动的)
    Simulation_duration:模拟时长(s)
@@ -75,12 +75,11 @@ def Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulu
    singleOri:等于True的话就一次只输入一张图片,默认为True
    plotdw:是否调用戴老师的画图函数（会生成很多图像，运行比较慢，默认不画）
       注意，plotdw=True的时候不会生成spikeCount-...bin文件
+   plotTC:是否画出tuning curve,默认为False
+      注意：plotdw=True时plotTC才会发挥作用（具体见ori.sh)
    cfg_file_id: 指定使用的minimal配置文件编号,默认为空（即使用minimal.cfg作为cfg文件）
    '''
    generate_input(gratings_path,C,P,SF,D,frameRate,size,stimulus_name)  
-   # fStimulus=stimulus_name+'.bin'
-   # fStimulus_path = gratings_path+fStimulus
-   # shutil.copy(fStimulus_path, RESOURCE_DIR)
    bin_files = sorted([filename for filename in os.listdir(gratings_path) if filename.endswith('.bin') and not filename.endswith('_cfg.bin') and filename.startswith(stimulus_name)], key=lambda x: int(x.split('_')[-1].split('.')[0]))
 
    for file in bin_files:
@@ -142,6 +141,10 @@ def Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulu
                lines[i] = f"plotdw={plotdw} \n"
                if log_on:
                   print(f"changed plotdw = {plotdw}") 
+         if "plotTC=" in lines[i] and "#plotTC =" not in lines[i]:
+               lines[i] = f"plotTC={plotTC} \n"
+               if log_on:
+                  print(f"changed plotTC = {plotTC}") 
          if "SF=" in lines[i] and "#SF=" not in lines[i]:
                lines[i] = f"SF={SF[0]} \n"
                if log_on:
@@ -156,7 +159,7 @@ def Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulu
 
 def Run_Our_Model():
    singleOri=False
-   frameRate=96
+   frameRate=1
    Simulation_duration=1
    C=np.array([0.05,0.15,0.25,0.3,0.35,0.45])
    P=np.array([0.5*np.pi])
@@ -164,7 +167,7 @@ def Run_Our_Model():
    D = np.array([np.pi/6])  # 方向范围[0,pi]
    size=128
    stimulus_name=f"try_contrast"
-   Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulus_name, log_on=True, singleOri=False,plotdw=False)
+   Modify_Parameters(frameRate, Simulation_duration, C, P, SF, D, size, stimulus_name, log_on=True, singleOri=False, plotdw=True,plotTC=False)
   
    #运行代码
    start_time = time.time()

@@ -419,7 +419,7 @@ if __name__ == "__main__" :
     # modes=['driftgrating']
     parameter='resolution'
     # parameter='Simulation_duration'
-    experiment = False #生成数据，运行一次即可，后面计算可以改为False
+    experiment = True #生成数据，运行一次即可，后面计算可以改为False
     cut = False
     
     for mode in modes:
@@ -428,17 +428,17 @@ if __name__ == "__main__" :
             if experiment==True:
                 Experiment_resolution(mode,repeat=10)
             resolution, lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
-            # plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
+            plot_time_resolution(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
             plot_heatmap(resolution,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std_single, v1_std_single, pic_name)
         else:
             if experiment==True:
                 Experiment_Simulation_duration(mode,repeat=10)
-            # Simulation_duration,lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
-            # # plot_time_Simulation_durations(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
-            # print(f"lgn_std={lgn_std}")
-            # print(f"lgn_fr_single={lgn_std_single.shape}")
-            # print(f"v1_fr_single={v1_std_single.shape}")
-            # plot_heatmap(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
+            Simulation_duration,lgn_fr_max, v1_fr_max, lgn_fr_mean, v1_fr_mean, run_time_mean,lgn_std, v1_std ,lgn_std_single, v1_std_single=compute_lgn_fr(0,mode,parameter)
+            # plot_time_Simulation_durations(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,pic_name)
+            print(f"lgn_std={lgn_std}")
+            print(f"lgn_fr_single={lgn_std_single.shape}")
+            print(f"v1_fr_single={v1_std_single.shape}")
+            plot_heatmap(Simulation_duration,lgn_fr_max,v1_fr_max,lgn_fr_mean,v1_fr_mean,run_time_mean,lgn_std, v1_std,pic_name)
 
             if cut:
                 cut_off_times=[0,40,80,120,160,200,240,180,320,360]
@@ -453,14 +453,14 @@ if __name__ == "__main__" :
                 np.savez(img_save_path+f'cut_off_times_{mode}.npz',Simulation_duration=Simulation_duration, cut_off_times=cut_off_times, lgn_max=lgn_max, lgn_mean=lgn_mean)
                 print(f"lgn_max.shape={np.array(lgn_max_list).shape}")
 
-            else:    
-                with np.load(img_save_path+f'cut_off_times_{mode}.npz',allow_pickle=True) as data:
-                    Simulation_duration = data['Simulation_duration']
-                    cut_off_times = data ['cut_off_times']
-                    lgn_max = data['lgn_max']
-                    lgn_mean = data['lgn_mean']
-                print(f"Simulation_duration={Simulation_duration}")
-                pic_name0='cut_'+pic_name
-                plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_name0)
+            # else:    
+            #     with np.load(img_save_path+f'cut_off_times_{mode}.npz',allow_pickle=True) as data:
+            #         Simulation_duration = data['Simulation_duration']
+            #         cut_off_times = data ['cut_off_times']
+            #         lgn_max = data['lgn_max']
+            #         lgn_mean = data['lgn_mean']
+            #     print(f"Simulation_duration={Simulation_duration}")
+            #     pic_name0='cut_'+pic_name
+            #     plot_cut_off_time(Simulation_duration,cut_off_times,lgn_max,lgn_mean,pic_name0)
 
     print('--------------finished-------------------')
