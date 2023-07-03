@@ -1,16 +1,16 @@
 import cv2
 import os
 
-def images_to_video(path):
+def images_to_video(img_path):
     img_array = []
     
-    imgList = os.listdir(path)
+    imgList = os.listdir(img_path)
     #imgList.sort(key=lambda x: int(x.replace("layer","").split('.')[0])) 
     imgList.sort(key=lambda x: float(x.split('.')[0]))  
     #print(imgList)
     for count in range(0, len(imgList)): 
         filename = os.path.join(imgList[count])
-        img = cv2.imread(path + filename)
+        img = cv2.imread(img_path + filename)
         if img is None:
             print(filename + " is error!")
             continue
